@@ -1,31 +1,31 @@
 package com.net.angular.mongo.models;
 
-import java.util.Date;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.validation.constraints.Size;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.validator.constraints.NotBlank;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.validation.constraints.Size;
+import java.util.Date;
+import java.util.UUID;
 
 @Entity
 public class Todo {
-   
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	 private String id;
-	
+    @Id
+    @Column(nullable = false, updatable = false)
+    private String id;
+
     @NotBlank
-    @Size(max=100)
- 
+    @Size(max = 100)
     private String title;
 
-    private Boolean completed = false;
+    @Column(nullable = false)
+    private Boolean completed = Boolean.FALSE;
 
-    private Date createdAt = new Date();
+    @Column(nullable = false, updatable = false)
+    private Date createdAt;
 
     public Todo() {
         super();
@@ -33,6 +33,16 @@ public class Todo {
 
     public Todo(String title) {
         this.title = title;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (id == null || id.trim().isEmpty()) {
+            id = UUID.randomUUID().toString();
+        }
+        if (createdAt == null) {
+            createdAt = new Date();
+        }
     }
 
     public String getId() {
@@ -69,8 +79,6 @@ public class Todo {
 
     @Override
     public String toString() {
-        return String.format(
-                "Todo[id=%s, title='%s', completed='%s']",
-                id, title, completed);
+        return String.format("Todo[id=%s, title='%s', completed='%s']", id, title, completed);
     }
 }
