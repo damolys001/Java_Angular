@@ -1,17 +1,9 @@
 package com.net.angular.mongo.repositories;
 
-
-import org.springframework.data.repository.CrudRepository;
-//import org.springframework.data.mongodb.repository.MongoRepository;
+import com.net.angular.mongo.models.Todo;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.net.angular.mongo.models.Todo;
-
 @Repository
-
-public interface TodoRepository extends CrudRepository<Todo, String> {
-
+public interface TodoRepository extends JpaRepository<Todo, String> {
 }
-//public interface TodoRepository extends MongoRepository<Todo, String> {
-
-//}

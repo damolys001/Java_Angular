@@ -1,52 +1,52 @@
 package com.net.angular.mongo.controllers;
 
-import javax.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.net.angular.mongo.models.Todo;
+import com.net.angular.mongo.repositories.TodoRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.net.angular.mongo.models.Todo;
-import com.net.angular.mongo.repositories.TodoRepository;
-
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin("*")
+@CrossOrigin(origins = "*")
 public class TodoController {
 
-    @Autowired
-    TodoRepository todoRepository;
+    private final TodoRepository todoRepository;
+
+    public TodoController(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
+    }
 
     @GetMapping("/todos")
     public List<Todo> getAllTodos() {
         Sort sortByCreatedAtDesc = new Sort(Sort.Direction.DESC, "createdAt");
-         return (List<Todo>) todoRepository.findAll();
+        return todoRepository.findAll(sortByCreatedAtDesc);
     }
 
     @PostMapping("/todos")
     public Todo createTodo(@Valid @RequestBody Todo todo) {
-        todo.setCompleted(false);
+        todo.setCompleted(Boolean.FALSE);
         return todoRepository.save(todo);
     }
 
-    @GetMapping(value="/todos/{id}")
+    @GetMapping("/todos/{id}")
     public ResponseEntity<Todo> getTodoById(@PathVariable("id") String id) {
         Todo todo = todoRepository.findOne(id);
-        if(todo == null) {
+        if (todo == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            return new ResponseEntity<>(todo, HttpStatus.OK);
         }
+        return new ResponseEntity<>(todo, HttpStatus.OK);
     }
 
-    @PutMapping(value="/todos/{id}")
+    @PutMapping("/todos/{id}")
     public ResponseEntity<Todo> updateTodo(@PathVariable("id") String id,
                                            @Valid @RequestBody Todo todo) {
         Todo todoData = todoRepository.findOne(id);
-        if(todoData == null) {
+        if (todoData == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         todoData.setTitle(todo.getTitle());
@@ -55,8 +55,13 @@ public class TodoController {
         return new ResponseEntity<>(updatedTodo, HttpStatus.OK);
     }
 
-    @DeleteMapping(value="/todos/{id}")
-    public void deleteTodo(@PathVariable("id") String id) {
+    @DeleteMapping("/todos/{id}")
+    public ResponseEntity<Void> deleteTodo(@PathVariable("id") String id) {
+        Todo existingTodo = todoRepository.findOne(id);
+        if (existingTodo == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         todoRepository.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
